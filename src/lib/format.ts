@@ -22,3 +22,14 @@ export function parseWonInput(text: string): number | null {
   const value = Number(digits);
   return Number.isSafeInteger(value) ? value : null;
 }
+
+/** 입력 중 표시용: 숫자만 남기고 콤마 */
+export function toWonText(text: string): string {
+  const value = parseWonInput(text);
+  return value === null ? "" : formatWon(value);
+}
+
+/** 하루 금액 변화: -1200 → "-1,200원", 1200 → "+1,200원" */
+export function formatSignedWon(value: number): string {
+  return `${value > 0 ? "+" : ""}${formatWon(value)}원`;
+}

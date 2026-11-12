@@ -34,3 +34,18 @@ body {
   background: var(--color-bg);
   font-family: var(--font-sans);
 }
+
+/* Tailwind v4는 버튼 기본 커서가 화살표 → 누를 수 있는 건 손가락 커서로 */
+@layer base {
+  button:not(:disabled),
+  [role="button"],
+  [role="switch"],
+  select,
+  input[type="checkbox"],
+  label[for] {
+    cursor: pointer;
+  }
+  :disabled {
+    cursor: not-allowed;
+  }
+}

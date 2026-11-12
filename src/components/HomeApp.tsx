@@ -2,7 +2,7 @@
 
 import { useMemo, useSyncExternalStore } from "react";
 import { parseAppData, readRaw, subscribe } from "@/lib/storage";
-import InterimResult from "./InterimResult";
+import MainScreen from "./main/MainScreen";
 import SetupForm from "./SetupForm";
 
 /** 서버 렌더·하이드레이션 중에는 localStorage를 못 읽으므로 undefined(=아직 모름) */
@@ -20,5 +20,5 @@ export default function HomeApp(): React.ReactNode {
   // 비었거나 깨졌으면 첫 설정
   if (data === null) return <SetupForm />;
 
-  return <InterimResult data={data} />;
+  return <MainScreen data={data} />;
 }

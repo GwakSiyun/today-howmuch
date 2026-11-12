@@ -102,6 +102,26 @@ export function nextPayday(
   throw new Error("다음 지급일을 찾지 못했어요");
 }
 
+/**
+ * 오늘이거나 오늘 이전인 가장 최근 실제 지급일 (진행 막대의 시작점).
+ * 오늘이 지급일이면 오늘.
+ */
+export function prevPayday(
+  today: Date,
+  rule: PaydayRule,
+  isHoliday: HolidayLookup = isKoreanHoliday,
+): Date {
+  const base = startOfDay(today);
+  let best: Date | null = null;
+  // 다음 달 지급일이 이번 달로 당겨질 수도 있어 +1까지 본다
+  for (let offset = -2; offset <= 1; offset += 1) {
+    const candidate = resolvePayday(base.getFullYear(), base.getMonth() + offset, rule, isHoliday);
+    if (diffInDays(candidate, base) >= 0 && (best === null || candidate > best)) best = candidate;
+  }
+  if (best === null) throw new Error("지난 지급일을 찾지 못했어요");
+  return best;
+}
+
 /** 오늘부터 지급일 전날까지 남은 날수(오늘 포함). 항상 1 이상 */
 export function daysUntilPayday(today: Date, payday: Date): number {
   return Math.max(1, diffInDays(today, payday));

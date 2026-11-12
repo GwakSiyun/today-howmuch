@@ -1,72 +1,16 @@
 "use client";
 
 import { useId, useState } from "react";
-import type { FixedExpense } from "@/lib/budget";
-import { formatHeaderDate, formatWon, parseWonInput } from "@/lib/format";
+import { emptyDraft, draftsToExpenses, type ExpenseDraft } from "@/lib/fixedExpenses";
+import { formatHeaderDate, parseWonInput, toWonText } from "@/lib/format";
 import { toDateKey } from "@/lib/payday";
 import { saveAppData } from "@/lib/storage";
-
-interface ExpenseDraft {
-  id: string;
-  name: string;
-  amountText: string;
-}
-
-const PAY_DAYS: readonly number[] = Array.from({ length: 31 }, (_, i) => i + 1);
-
-let fallbackId = 0;
-function makeId(): string {
-  try {
-    return crypto.randomUUID();
-  } catch {
-    fallbackId += 1;
-    return `fx-${Date.now()}-${fallbackId}`;
-  }
-}
-
-/** 입력 중 표시용: 숫자만 남기고 콤마 */
-function toWonText(text: string): string {
-  const value = parseWonInput(text);
-  return value === null ? "" : formatWon(value);
-}
+import AutoWidthInput from "./AutoWidthInput";
+import FixedExpenseFields from "./FixedExpenseFields";
+import PayDayFields, { parsePayDay } from "./PayDayFields";
 
 // 목업 카드 스타일: 흰 카드 + 작은 회색 라벨 + 굵은 값
 const cardClass = "rounded-[10px] border border-transparent bg-card px-5 py-4 focus-within:border-ink";
-const labelClass = "text-[13px] text-sub";
-const hintClass = "mt-2 text-xs text-sub";
-const smallInputClass =
-  "h-11 w-full rounded-md border border-line bg-card px-3 text-[15px] text-ink outline-none focus:border-ink";
-
-interface AutoWidthInputProps {
-  value: string;
-  placeholder: string;
-  className: string;
-  onChange: (value: string) => void;
-  id?: string;
-  ariaLabel?: string;
-}
-
-/** 입력한 숫자 폭만큼만 늘어나는 입력창 — "265,000원"처럼 단위가 숫자 바로 뒤에 붙게 */
-function AutoWidthInput({ value, placeholder, className, onChange, id, ariaLabel }: AutoWidthInputProps): React.ReactNode {
-  return (
-    <span className="inline-grid min-w-0">
-      <span aria-hidden="true" className={`invisible col-start-1 row-start-1 whitespace-pre ${className}`}>
-        {value || placeholder}
-      </span>
-      <input
-        id={id}
-        aria-label={ariaLabel}
-        type="text"
-        inputMode="numeric"
-        autoComplete="off"
-        placeholder={placeholder}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`col-start-1 row-start-1 w-full min-w-0 bg-transparent p-0 outline-none placeholder:text-line ${className}`}
-      />
-    </span>
-  );
-}
 
 export default function SetupForm(): React.ReactNode {
   const baseId = useId();
@@ -74,35 +18,21 @@ export default function SetupForm(): React.ReactNode {
   const [balanceText, setBalanceText] = useState<string>("");
   const [earlyOnDayOff, setEarlyOnDayOff] = useState<boolean>(false);
   const [useFixedExpenses, setUseFixedExpenses] = useState<boolean>(false);
-  const [expenses, setExpenses] = useState<ExpenseDraft[]>([]);
+  const [drafts, setDrafts] = useState<ExpenseDraft[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   function toggleFixedExpenses(): void {
     const next = !useFixedExpenses;
     setUseFixedExpenses(next);
-    if (next && expenses.length === 0) {
-      setExpenses([{ id: makeId(), name: "", amountText: "" }]);
-    }
-  }
-
-  function updateExpense(id: string, patch: Partial<Omit<ExpenseDraft, "id">>): void {
-    setExpenses((prev) => prev.map((item) => (item.id === id ? { ...item, ...patch } : item)));
-  }
-
-  function addExpense(): void {
-    setExpenses((prev) => [...prev, { id: makeId(), name: "", amountText: "" }]);
-  }
-
-  function removeExpense(id: string): void {
-    setExpenses((prev) => prev.filter((item) => item.id !== id));
+    if (next && drafts.length === 0) setDrafts([emptyDraft()]);
   }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>): void {
     event.preventDefault();
-    const payDay = Number(payDayText);
+    const payDay = parsePayDay(payDayText);
     const balance = parseWonInput(balanceText);
 
-    if (!Number.isInteger(payDay) || payDay < 1 || payDay > 31) {
+    if (payDay === null) {
       setError("돈 들어오는 날을 골라 주세요.");
       return;
     }
@@ -111,23 +41,21 @@ export default function SetupForm(): React.ReactNode {
       return;
     }
 
-    // 이름·금액 둘 다 빈 줄은 무시, 하나만 채운 줄은 막기
-    const filled = expenses.filter((item) => item.name.trim() !== "" || item.amountText !== "");
-    const fixedExpenses: FixedExpense[] = [];
-    if (useFixedExpenses) {
-      for (const item of filled) {
-        const amount = parseWonInput(item.amountText);
-        if (item.name.trim() === "" || amount === null) {
-          setError("고정 지출은 이름과 금액을 둘 다 적어 주세요.");
-          return;
-        }
-        fixedExpenses.push({ id: item.id, name: item.name.trim(), amount, paidFor: null });
-      }
+    const fixed = useFixedExpenses ? draftsToExpenses(drafts) : { ok: true as const, items: [] };
+    if (!fixed.ok) {
+      setError(fixed.message);
+      return;
     }
 
     const saved = saveAppData({
       version: 1,
-      settings: { payDay, earlyOnDayOff, useFixedExpenses, fixedExpenses },
+      settings: {
+        payDay,
+        earlyOnDayOff,
+        // 스위치를 켰어도 항목이 하나도 없으면 끈 것과 같다
+        useFixedExpenses: fixed.items.length > 0,
+        fixedExpenses: fixed.items,
+      },
       balances: [{ date: toDateKey(new Date()), balance }],
     });
     if (!saved) {
@@ -137,9 +65,7 @@ export default function SetupForm(): React.ReactNode {
     setError(null);
   }
 
-  const payDayId = `${baseId}-payday`;
   const balanceId = `${baseId}-balance`;
-  const weekendId = `${baseId}-weekend`;
   const fixedId = `${baseId}-fixed`;
 
   return (
@@ -152,58 +78,17 @@ export default function SetupForm(): React.ReactNode {
 
       {/* 1. 다음 돈 들어오는 날 */}
       <section className={cardClass}>
-        <label htmlFor={payDayId} className={labelClass}>
-          다음 돈 들어오는 날
-        </label>
-        <div className="mt-1.5 flex items-center gap-2 text-[22px] font-bold whitespace-nowrap">
-          <span className="shrink-0">매달</span>
-          <span className="relative shrink-0">
-            <select
-              id={payDayId}
-              value={payDayText}
-              onChange={(e) => setPayDayText(e.target.value)}
-              className={`h-11 appearance-none rounded-md border border-line bg-card pr-8 pl-3 text-[22px] font-bold tabular-nums outline-none focus:border-ink ${
-                payDayText === "" ? "text-sub" : "text-ink"
-              }`}
-            >
-              <option value="" disabled>
-                선택
-              </option>
-              {PAY_DAYS.map((day) => (
-                <option key={day} value={day}>
-                  {day}
-                </option>
-              ))}
-            </select>
-            <span
-              aria-hidden="true"
-              className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-sub"
-            >
-              ▼
-            </span>
-          </span>
-          <span className="shrink-0">일</span>
-        </div>
-        <p className={hintClass}>31일처럼 없는 날은 그 달 말일로 계산해요.</p>
-
-        <label
-          htmlFor={weekendId}
-          className="mt-3 flex min-h-11 cursor-pointer items-center gap-2.5 border-t border-line pt-3"
-        >
-          <input
-            id={weekendId}
-            type="checkbox"
-            checked={earlyOnDayOff}
-            onChange={(e) => setEarlyOnDayOff(e.target.checked)}
-            className="size-[18px] shrink-0 accent-btn"
-          />
-          <span className="text-sm">주말·공휴일이면 전날 받아요</span>
-        </label>
+        <PayDayFields
+          payDayText={payDayText}
+          earlyOnDayOff={earlyOnDayOff}
+          onPayDayChange={setPayDayText}
+          onEarlyChange={setEarlyOnDayOff}
+        />
       </section>
 
       {/* 2. 지금 통장 잔액 */}
       <section className={cardClass}>
-        <label htmlFor={balanceId} className={labelClass}>
+        <label htmlFor={balanceId} className="text-[13px] text-sub">
           지금 통장 잔액
         </label>
         <label htmlFor={balanceId} className="mt-1.5 flex min-h-11 cursor-text items-baseline">
@@ -216,17 +101,17 @@ export default function SetupForm(): React.ReactNode {
           />
           <span className="ml-0.5 shrink-0 text-[22px] font-bold">원</span>
         </label>
-        <p className={hintClass}>토스·은행 앱에 보이는 숫자 그대로 적어 주세요.</p>
+        <p className="mt-2 text-xs text-sub">토스·은행 앱에 보이는 숫자 그대로 적어 주세요.</p>
       </section>
 
-      {/* 3. 고정 지출 */}
+      {/* 3. 고정 지출 (나중에 메인에서도 추가 가능) */}
       <section className={cardClass}>
         <div className="flex min-h-11 items-center justify-between gap-3">
           <div>
             <p id={fixedId} className="text-[15px] font-semibold">
               고정 지출 빼고 계산
             </p>
-            <p className="mt-0.5 text-xs text-sub">월세·통신비처럼 아직 안 나간 돈</p>
+            <p className="mt-0.5 text-xs text-sub">월세·통신비처럼 아직 안 나간 돈 · 나중에 넣어도 돼요</p>
           </div>
           <button
             type="button"
@@ -234,9 +119,7 @@ export default function SetupForm(): React.ReactNode {
             aria-checked={useFixedExpenses}
             aria-labelledby={fixedId}
             onClick={toggleFixedExpenses}
-            className={`relative h-7 w-12 shrink-0 rounded-md transition-colors ${
-              useFixedExpenses ? "bg-btn" : "bg-line"
-            }`}
+            className={`relative h-7 w-12 shrink-0 rounded-md transition-colors ${useFixedExpenses ? "bg-btn" : "bg-line"}`}
           >
             <span
               className={`absolute top-1 left-1 size-5 rounded-sm bg-card transition-transform ${
@@ -247,48 +130,8 @@ export default function SetupForm(): React.ReactNode {
         </div>
 
         {useFixedExpenses && (
-          <div className="mt-3 flex flex-col gap-2 border-t border-line pt-3">
-            {expenses.map((item, index) => (
-              <div key={item.id} className="flex items-center gap-2">
-                <input
-                  type="text"
-                  aria-label={`고정 지출 ${index + 1} 이름`}
-                  placeholder="예: 월세"
-                  value={item.name}
-                  onChange={(e) => updateExpense(item.id, { name: e.target.value })}
-                  className={`${smallInputClass} min-w-0 flex-1`}
-                />
-                <div className="relative w-32 shrink-0">
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    aria-label={`고정 지출 ${index + 1} 금액`}
-                    placeholder="0"
-                    value={item.amountText}
-                    onChange={(e) => updateExpense(item.id, { amountText: toWonText(e.target.value) })}
-                    className={`${smallInputClass} pr-8 text-right font-semibold tabular-nums`}
-                  />
-                  <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm text-sub">
-                    원
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => removeExpense(item.id)}
-                  aria-label={`고정 지출 ${index + 1} 삭제`}
-                  className="flex size-11 shrink-0 items-center justify-center rounded-md text-lg text-sub"
-                >
-                  ×
-                </button>
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={addExpense}
-              className="h-11 rounded-md border border-dashed border-line text-sm text-sub"
-            >
-              + 항목 추가
-            </button>
+          <div className="mt-3 border-t border-line pt-3">
+            <FixedExpenseFields drafts={drafts} onChange={setDrafts} />
           </div>
         )}
       </section>
