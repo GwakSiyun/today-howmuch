@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+/* 디자인 토큰 (docs/SPEC.md §4) — 라이트 단일 테마 */
+@theme {
+  --color-bg: #f6f5f1;
+  --color-card: #ffffff;
+  --color-sub: #7a786f;
+  --color-line: #e6e4dd;
+  --color-ink: #111412;
+  --color-btn: #1c1c1a;
+  --color-decrease: #c2410c;
+
+  --color-relaxed-card: #ddf3e5;
+  --color-relaxed-badge: #1f7a4d;
+  --color-relaxed-sub: #4e7a63;
+  --color-tight-card: #fbf0cc; /* 제안값 */
+  --color-tight-badge: #8a5d00; /* 제안값 */
+  --color-tight-sub: #7e6328; /* 제안값 */
+  --color-danger-card: #fce0da;
+  --color-danger-badge: #c4382a;
+  --color-danger-sub: #9a5145;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard",
+    "Noto Sans KR", "Malgun Gothic", sans-serif;
+}
+
+html {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-bg);
+  font-family: var(--font-sans);
+}
