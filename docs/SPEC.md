@@ -80,8 +80,10 @@ interface BalanceEntry { date: string /* YYYY-MM-DD */; balance: number }
 4. 월급날까지 카드: "13일 · 11/25" + 진행 막대(각진 끝)
 5. 지난번보다 카드 (F5)
 
-### F7. PWA · 환산 문구 · 다듬기 — 11/19
-- manifest + 아이콘, standalone 실행. 알림·위젯 없음
+### F7. PWA · 환산 문구 · 다듬기 — 11/16 앞당겨 구현
+- manifest(`src/app/manifest.ts`) + 아이콘, standalone 실행. 알림·위젯 없음. 서비스 워커(오프라인)는 범위 밖
+- 아이콘 A2-1: 베이지 바탕 가운데 ₩ + 오른쪽 아래 작은 회색 /일 (은행 앱처럼 안 보이게 '하루' 표시). favicon은 너무 작아 ₩만
+- 아이콘 다시 만들기: `node scripts/make-icons.mjs` (macOS 크롬 헤드리스 + Apple SD Gothic Neo)
 - 환산: "≈ 아아 2 · 삼각김밥 2" — 천원대 편의점 단골템 (가격은 §5 Q2)
 
 ### F8. 배포 · 유입 측정 — 11/20
