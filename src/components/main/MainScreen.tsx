@@ -15,6 +15,7 @@ import FixedExpenseSheet from "./FixedExpenseSheet";
 import InstallGuideCard from "../install/InstallGuideCard";
 import PaydayCard from "./PaydayCard";
 import SettingsSheet from "./SettingsSheet";
+import { useTodayKey } from "../useToday";
 
 type SheetKind = "balance" | "fixed" | "settings";
 
@@ -28,7 +29,9 @@ interface MainScreenProps {
 
 export default function MainScreen({ data, save = saveAppData, now }: MainScreenProps): React.ReactNode {
   const [sheet, setSheet] = useState<SheetKind | null>(null);
-  const today = now ?? new Date();
+  // 날짜가 바뀌면(앱으로 돌아왔을 때·자정) 다시 그려져 오늘 기준으로 다시 계산
+  const todayKey = useTodayKey();
+  const today = now ?? (todayKey ? fromDateKey(todayKey) : new Date());
   const { settings, balances } = data;
   const latest = balances[balances.length - 1];
   const rule = { payDay: settings.payDay, earlyOnDayOff: settings.earlyOnDayOff };
