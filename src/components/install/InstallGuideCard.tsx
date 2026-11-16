@@ -68,9 +68,16 @@ export default function InstallGuideCard({ variant, hasData, previewEnv }: Insta
         <span className="block text-[13px] font-semibold text-ink">
           {inApp ? `${toBrowser} 열어서 홈 화면에 추가하기 ›` : "홈 화면에 추가하기 ›"}
         </span>
-        <span className="mt-0.5 block text-xs text-sub">
-          앱처럼 바로 열려요{env.ios && hasData ? " · 추가 후 잔액은 한 번 더 입력해요" : ""}
-        </span>
+        {env.context === "ios-safari" ? (
+          // 아이폰 사파리는 7일 동안 안 열면 사이트 저장값을 지울 수 있음(홈 화면 앱은 해당 없음)
+          <span className="mt-0.5 block text-xs leading-5 text-decrease">
+            사파리에선 7일 동안 안 열면 기록이 지워질 수 있어요
+          </span>
+        ) : (
+          <span className="mt-0.5 block text-xs text-sub">
+            앱처럼 바로 열려요{env.ios && hasData ? " · 추가 후 잔액은 한 번 더 입력해요" : ""}
+          </span>
+        )}
       </button>
       <button type="button" onClick={dismiss} className="min-h-11 shrink-0 px-4 text-xs text-sub">
         닫기
