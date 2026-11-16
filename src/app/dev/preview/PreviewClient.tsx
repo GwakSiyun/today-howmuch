@@ -2,6 +2,8 @@
 
 // ⚠️ 개발용 미리보기 — 예시 데이터. 기기 저장소(localStorage)는 읽지도 쓰지도 않는다.
 import { useState, useSyncExternalStore } from "react";
+import InstallGuideCard from "@/components/install/InstallGuideCard";
+import type { InstallEnv } from "@/components/install/useInstall";
 import MainScreen from "@/components/main/MainScreen";
 import { toDateKey } from "@/lib/payday";
 import type { AppData, BalanceEntry } from "@/lib/storage";
@@ -79,6 +81,18 @@ function buildScenario(key: ScenarioKey, now: Date): AppData {
   }
 }
 
+// 홈 화면 추가 안내: 기기·들어온 곳별 (실제 판별 대신 이 값으로 보여 줌)
+const INSTALL_CASES: ReadonlyArray<{ label: string; env: InstallEnv }> = [
+  { label: "아이폰 사파리", env: { context: "ios-safari", ios: true, source: null } },
+  { label: "아이폰 · 유튜브에서", env: { context: "ios-safari", ios: true, source: "youtube" } },
+  { label: "아이폰 인스타 안", env: { context: "instagram", ios: true, source: "instagram" } },
+  { label: "아이폰 카톡 안", env: { context: "kakao", ios: true, source: null } },
+  { label: "아이폰 크롬", env: { context: "ios-other", ios: true, source: null } },
+  { label: "안드로이드 크롬", env: { context: "android-chrome", ios: false, source: null } },
+  { label: "안드로이드 인스타 안", env: { context: "instagram", ios: false, source: "instagram" } },
+  { label: "삼성 인터넷", env: { context: "android-other", ios: false, source: null } },
+];
+
 function subscribeNothing(): () => void {
   return () => {};
 }
@@ -89,6 +103,7 @@ export default function PreviewClient(): React.ReactNode {
   const [scenario, setScenario] = useState<ScenarioKey>("relaxed");
   // 시나리오별로 바텀시트·나갔어요를 눌러 본 결과를 메모리에만 들고 있음
   const [edited, setEdited] = useState<Partial<Record<ScenarioKey, AppData>>>({});
+  const [installCase, setInstallCase] = useState<number>(0);
 
   if (!mounted) return <div aria-busy="true" className="min-h-[60vh]" />;
 
@@ -127,6 +142,28 @@ export default function PreviewClient(): React.ReactNode {
       </div>
 
       <MainScreen key={scenario} data={data} save={save} now={now} />
+
+      <div className="mt-6 rounded-md border border-dashed border-sub/50 p-2">
+        <p className="px-1 pb-1.5 text-[11px] text-sub">홈 화면 추가 안내 · 들어온 곳별 (위: 첫 설정 화면 맨 위 / 아래: 메인 맨 아래)</p>
+        <div className="flex flex-wrap gap-1">
+          {INSTALL_CASES.map((item, index) => (
+            <button
+              key={item.label}
+              type="button"
+              onClick={() => setInstallCase(index)}
+              className={`h-8 rounded-md px-2.5 text-xs ${
+                index === installCase ? "bg-btn text-white" : "border border-line bg-card text-sub"
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div key={installCase} className="flex flex-col gap-2.5">
+        <InstallGuideCard variant="setup" hasData={false} previewEnv={INSTALL_CASES[installCase].env} />
+        <InstallGuideCard variant="main" hasData previewEnv={INSTALL_CASES[installCase].env} />
+      </div>
     </div>
   );
 }

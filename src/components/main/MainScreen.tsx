@@ -12,6 +12,7 @@ import BalanceSheet from "./BalanceSheet";
 import CompareCard from "./CompareCard";
 import FixedExpenseCard from "./FixedExpenseCard";
 import FixedExpenseSheet from "./FixedExpenseSheet";
+import InstallGuideCard from "../install/InstallGuideCard";
 import PaydayCard from "./PaydayCard";
 import SettingsSheet from "./SettingsSheet";
 
@@ -90,6 +91,8 @@ export default function MainScreen({ data, save = saveAppData, now }: MainScreen
           + 고정 지출 추가 <span className="text-sub/70">· 월세·통신비처럼 아직 안 나간 돈</span>
         </button>
       )}
+
+      <InstallGuideCard variant="main" hasData />
 
       {sheet === "balance" && <BalanceSheet data={data} save={save} onClose={closeSheet} />}
       {sheet === "fixed" && <FixedExpenseSheet data={data} save={save} onClose={closeSheet} />}
