@@ -15,20 +15,41 @@ const work = mkdtempSync(join(tmpdir(), "today-howmuch-icons-"));
  * size: 출력 px
  * scale: 내용 크기 비율 (maskable은 안드로이드가 가장자리를 잘라서 0.8로 줄임)
  * withDay: "/일" 표시 여부 (16~48px favicon은 너무 작아 ₩만)
+ *
+ * 캔버스에 직접 그린다. 글꼴 줄 높이(위아래 빈 공간 포함)가 아니라
+ * measureText로 잰 "₩" 글자 모양 자체를 정중앙에 놓는다. (이전: 줄 높이 기준이라 약 6% 위로 뜸)
+ * "/일"은 ₩ 오른쪽 아래 모서리에 붙인다.
  */
 function html(size, { scale = 1, withDay = true } = {}) {
   const s = size * scale;
-  const won = s * 0.5625; // 72/128
-  const day = s * 0.1328; // 17/128
-  // 시안 기준 /일 위치(128 기준 left 88, top 80)를 가운데 기준 오프셋으로 환산
-  const dayLeft = size / 2 + s * (88 / 128 - 0.5);
-  const dayTop = size / 2 + s * (80 / 128 - 0.5);
   return `<!doctype html><html><head><meta charset="utf-8"><style>
 html,body{margin:0;padding:0;width:${size}px;height:${size}px;overflow:hidden;background:#F6F5F1}
-body{position:relative;font-family:"Apple SD Gothic Neo",sans-serif}
-.won{position:absolute;left:50%;top:50%;transform:translate(-50%,-52%);font-size:${won}px;font-weight:800;color:#111412;line-height:1}
-.day{position:absolute;left:${dayLeft}px;top:${dayTop}px;font-size:${day}px;font-weight:700;color:#7A786F;line-height:1}
-</style></head><body><span class="won">₩</span>${withDay ? '<span class="day">/일</span>' : ""}</body></html>`;
+canvas{display:block}
+</style></head><body><canvas id="c" width="${size}" height="${size}"></canvas><script>
+const size = ${size}, s = ${s}, withDay = ${withDay};
+const FONT = '"Apple SD Gothic Neo", sans-serif';
+const ctx = document.getElementById("c").getContext("2d");
+ctx.fillStyle = "#F6F5F1";
+ctx.fillRect(0, 0, size, size);
+
+// ₩: 글자 모양 경계 기준 정중앙
+ctx.font = "800 " + (s * 0.5625) + "px " + FONT;
+const m = ctx.measureText("\u20A9");
+const x = size / 2 + (m.actualBoundingBoxLeft - m.actualBoundingBoxRight) / 2;
+const y = size / 2 + (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2;
+ctx.fillStyle = "#111412";
+ctx.fillText("\u20A9", x, y);
+
+if (withDay) {
+  // /일: ₩ 오른쪽 끝에서 살짝 안쪽, ₩ 아래 끝보다 살짝 아래 (시안 A2-1 비율)
+  const right = x + m.actualBoundingBoxRight;
+  const bottom = y + m.actualBoundingBoxDescent;
+  ctx.font = "700 " + (s * 0.1328) + "px " + FONT;
+  const d = ctx.measureText("/\uC77C");
+  ctx.fillStyle = "#7A786F";
+  ctx.fillText("/\uC77C", right - s * 0.053 + d.actualBoundingBoxLeft, bottom - s * 0.008 + d.actualBoundingBoxAscent);
+}
+</script></body></html>`;
 }
 
 function render(name, size, options) {
