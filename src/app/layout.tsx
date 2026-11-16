@@ -6,6 +6,14 @@ export const metadata: Metadata = {
   description:
     "월급날 계산기 오늘얼마. 지금 잔액과 다음 월급날·용돈날만 넣으면 오늘 얼마까지 써도 되는지 알려줘요. 앱 설치·지출 기록 없이 웹에서 바로.",
   applicationName: "오늘얼마",
+  // 아이폰 '홈 화면에 추가': 앱 이름·주소창 없이 열기·밝은 상태바 (아이콘은 app/apple-icon.png)
+  appleWebApp: {
+    capable: true,
+    title: "오늘얼마",
+    statusBarStyle: "default",
+  },
+  // 아이폰이 금액 숫자를 전화번호 링크로 바꾸지 않게
+  formatDetection: { telephone: false },
 };
 
 export const viewport: Viewport = {
