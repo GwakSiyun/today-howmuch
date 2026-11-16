@@ -3,11 +3,12 @@
 import { useId, useState } from "react";
 import { emptyDraft, draftsToExpenses, type ExpenseDraft } from "@/lib/fixedExpenses";
 import { formatHeaderDate, parseWonInput, toWonText } from "@/lib/format";
-import { toDateKey } from "@/lib/payday";
+import { fromDateKey, toDateKey } from "@/lib/payday";
 import { saveAppData } from "@/lib/storage";
 import AutoWidthInput from "./AutoWidthInput";
 import FixedExpenseFields from "./FixedExpenseFields";
 import InstallGuideCard from "./install/InstallGuideCard";
+import { useTodayKey } from "./useToday";
 import PayDayFields, { parsePayDay } from "./PayDayFields";
 
 // 목업 카드 스타일: 흰 카드 + 작은 회색 라벨 + 굵은 값
@@ -21,6 +22,7 @@ export default function SetupForm(): React.ReactNode {
   const [useFixedExpenses, setUseFixedExpenses] = useState<boolean>(false);
   const [drafts, setDrafts] = useState<ExpenseDraft[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const todayKey = useTodayKey();
 
   function toggleFixedExpenses(): void {
     const next = !useFixedExpenses;
@@ -73,7 +75,7 @@ export default function SetupForm(): React.ReactNode {
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-3">
       <header className="flex items-baseline justify-between pb-1">
         <h1 className="text-lg font-bold">오늘얼마</h1>
-        <span className="text-sm text-sub">{formatHeaderDate(new Date())}</span>
+        <span className="text-sm text-sub">{formatHeaderDate(todayKey ? fromDateKey(todayKey) : new Date())}</span>
       </header>
       <p className="pb-2 text-sm text-sub">두 가지만 알려 주면 오늘 써도 되는 돈을 계산해요.</p>
 

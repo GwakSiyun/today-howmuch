@@ -79,6 +79,7 @@ interface BalanceEntry { date: string /* YYYY-MM-DD */; balance: number }
 3. 잔액 카드: "남은 잔액 · N일 전" + 금액 + [바꾸기] (터치 44px)
 4. 월급날까지 카드: "13일 · 11/25" + 진행 막대(각진 끝)
 5. 지난번보다 카드 (F5)
+- 날짜 갱신: 홈 화면 앱이 백그라운드에서 다음 날 다시 열려도 어제 값이 남지 않게, 앱으로 돌아올 때(visibilitychange·focus·pageshow)와 자정에 오늘 날짜를 다시 확인해 다시 계산 (`useTodayKey`)
 
 ### F7. PWA · 환산 문구 · 다듬기 — 11/16 앞당겨 구현
 - manifest(`src/app/manifest.ts`) + 아이콘, standalone 실행. 알림·위젯 없음. 서비스 워커(오프라인)는 범위 밖
