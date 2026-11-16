@@ -282,6 +282,12 @@ export default function InstallGuideSheet({ env, hasData, onClose }: InstallGuid
         <p className="mt-4 rounded-md bg-bg px-3 py-2.5 text-xs leading-5 text-sub">
           아이폰은 홈 화면 앱이 사파리와 따로 저장해요. 추가한 다음엔 <B>홈 화면 아이콘으로 열어서</B> 써 주세요.
           {hasData && " 이미 적은 월급날·잔액은 홈 화면 앱에서 한 번 더 입력해야 해요."}
+          {env.context === "ios-safari" && (
+            <>
+              {" "}
+              사파리에서만 쓰면 <B>7일 동안 안 열었을 때 기록이 지워질 수 있어요</B>. 홈 화면 앱은 괜찮아요.
+            </>
+          )}
         </p>
       )}
     </BottomSheet>
