@@ -1,5 +1,7 @@
 // 공용 바텀시트 틀 — 배경 누르기·Esc로 닫기, 아래쪽 [닫기][저장] 버튼
+// document.body 에 그린다(portal): 첫 설정 화면처럼 <form> 안에서 열어도 폼이 겹치지 않게
 import { useEffect, useId } from "react";
+import { createPortal } from "react-dom";
 
 interface BottomSheetProps {
   title: string;
@@ -30,10 +32,12 @@ export default function BottomSheet({
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>): void {
     event.preventDefault();
+    // portal이어도 React 이벤트는 부모 컴포넌트로 올라감 → 바깥 폼(첫 설정)이 같이 제출되지 않게
+    event.stopPropagation();
     onSubmit();
   }
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-end justify-center">
       <button type="button" aria-label="닫기" onClick={onClose} className="absolute inset-0 bg-ink/40" />
       <form
@@ -64,6 +68,7 @@ export default function BottomSheet({
           </button>
         </div>
       </form>
-    </div>
+    </div>,
+    document.body,
   );
 }
