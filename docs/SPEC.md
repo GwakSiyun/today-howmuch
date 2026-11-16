@@ -93,6 +93,12 @@ interface BalanceEntry { date: string /* YYYY-MM-DD */; balance: number }
 - User-Agent 판별이라 100% 정확하지 않음. 유튜브 앱 안 화면은 사파리·크롬과 구분 불가 → `?from=` 으로 보완
 - 미리보기 `/dev/preview` 아래에서 들어온 곳별 안내 확인
 
+### F7-3. 링크 미리보기 이미지 — 11/16
+- `src/app/opengraph-image.png`(1200×630, 시안 A: 왼쪽 "월급날까지 / 오늘 얼마 써도 될까?" + 오른쪽 여유 금액 카드)
+- 카드 금액은 실제 계산과 일치: 20,400원 → 아아 13 · 삼각김밥 14 (인스타 목업의 '아아 2 · 김밥 2'는 실제와 다름)
+- 다시 만들기: `node scripts/make-og.mjs` (크롬 헤드리스, 빌드 때 글꼴 다운로드 없음)
+- `metadataBase` = https://today-howmuch.vercel.app, og·twitter 메타
+
 ### F8. 배포 · 유입 측정 — 11/20
 - Vercel + @vercel/analytics
 - `?from=instagram` / `?from=youtube` → 페이지뷰를 가상 경로 `/from/instagram` · `/from/youtube` 로 기록 (`beforeSend`). Vercel 무료 플랜은 커스텀 이벤트·UTM 집계가 Pro 전용이라 우회 — 대시보드 Pages 에서 확인. 무료 한도: 계정 전체(막차 계산기 포함) 월 50,000 이벤트, 보관 1개월
