@@ -10,6 +10,9 @@ const UA = {
     "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 389.0.0.29.88 (iPhone15,2; iOS 18_5; ko_KR; ko; scale=3.00; 1179x2556; 754522845)",
   iosKakao:
     "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 KAKAOTALK 25.6.1",
+  // 아이폰 앱 안 WKWebView 기본값: Version/·Safari/ 가 없음
+  iosWebview:
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
   ipadDesktopMode:
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Safari/605.1.15",
   androidChrome:
@@ -42,6 +45,10 @@ describe("detectInstallContext", () => {
     expect(detect(UA.iosInstagram)).toBe("instagram");
     expect(detect(UA.androidInstagram)).toBe("instagram");
     expect(detect(UA.iosKakao)).toBe("kakao");
+  });
+
+  it("이름 모를 아이폰 앱 안 화면(Safari/ 없음, 에타 등)은 앱 안으로", () => {
+    expect(detect(UA.iosWebview)).toBe("inapp");
   });
 
   it("아이패드(데스크톱 모드)는 맥처럼 보여도 터치로 아이폰 계열", () => {
