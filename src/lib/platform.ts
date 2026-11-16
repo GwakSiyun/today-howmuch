@@ -34,7 +34,9 @@ export function detectInstallContext(input: PlatformInput): InstallContext {
 
   if (isIos(input)) {
     // 아이폰 크롬(CriOS)·파이어폭스(FxiOS)·엣지(EdgiOS) 등은 사파리가 아님
-    return /CriOS|FxiOS|EdgiOS|OPiOS|Whale|NAVER/.test(ua) ? "ios-other" : "ios-safari";
+    if (/CriOS|FxiOS|EdgiOS|OPiOS|Whale|NAVER/.test(ua)) return "ios-other";
+    // 진짜 사파리는 "Safari/"가 꼭 붙음. 없으면 이름 모를 앱 안 화면(에타·당근·밴드 등 WKWebView)
+    return /Safari\//.test(ua) ? "ios-safari" : "inapp";
   }
   if (/Android/.test(ua)) {
     // "; wv)" = 앱 안 웹뷰
