@@ -1,5 +1,6 @@
 // 홈 화면에 추가하는 법 — 들어온 곳(아이폰 사파리·안드로이드 크롬·인스타·카톡·유튜브)에 맞춘 단계
 import { useState } from "react";
+import { josa } from "@/lib/korean";
 import { needsYoutubeHint } from "@/lib/platform";
 import BottomSheet from "../BottomSheet";
 import StepIcon, { type StepIconKind } from "./StepIcon";
@@ -64,6 +65,9 @@ const ANDROID_CHROME_STEPS: Step[] = [
 
 export function buildGuide(env: InstallEnv, url: string): Guide {
   const browser = env.ios ? "사파리" : "크롬";
+  // 조사는 받침에 맞춰: 사파리로/크롬으로, 사파리가/크롬이
+  const toBrowser = josa(browser, "으로/로");
+  const browserSubject = josa(browser, "이/가");
   const youtubeStep: Step[] = needsYoutubeHint(env.context, env.source)
     ? [
         {
@@ -109,7 +113,7 @@ export function buildGuide(env: InstallEnv, url: string): Guide {
     case "instagram":
       return {
         title: "인스타 안에서는 홈 화면에 추가가 안 돼요",
-        subtitle: `${browser}로 연 다음 추가해 주세요`,
+        subtitle: `${toBrowser} 연 다음 추가해 주세요`,
         copyUrl: true,
         externalLink: env.ios ? undefined : { label: "크롬으로 열기", href: chromeIntent(url) },
         steps: env.ios
@@ -130,18 +134,18 @@ export function buildGuide(env: InstallEnv, url: string): Guide {
     case "kakao":
       return {
         title: "카톡 안에서는 홈 화면에 추가가 안 돼요",
-        subtitle: `${browser}로 연 다음 추가해 주세요`,
+        subtitle: `${toBrowser} 연 다음 추가해 주세요`,
         copyUrl: true,
-        externalLink: { label: `${browser}로 열기`, href: `kakaotalk://web/openExternal?url=${encodeURIComponent(url)}` },
+        externalLink: { label: `${toBrowser} 열기`, href: `kakaotalk://web/openExternal?url=${encodeURIComponent(url)}` },
         steps: [
-          { text: <>아래 <B>{browser}로 열기</B>를 눌러요</>, hints: ["안 되면 오른쪽 아래 ⋯ → '다른 브라우저로 열기'"] },
-          { text: <>{browser}가 열리면 화면 위 안내를 다시 눌러요</> },
+          { text: <>아래 <B>{toBrowser} 열기</B>를 눌러요</>, hints: ["안 되면 카톡 화면의 ⋯ 또는 ⋮ 메뉴 → '다른 브라우저로 열기'"] },
+          { text: <>{browserSubject} 열리면 화면 위 안내를 다시 눌러요</> },
         ],
       };
     case "inapp":
       return {
         title: "이 앱 안에서는 홈 화면에 추가가 안 돼요",
-        subtitle: `${browser}로 연 다음 추가해 주세요`,
+        subtitle: `${toBrowser} 연 다음 추가해 주세요`,
         copyUrl: true,
         externalLink: env.ios ? undefined : { label: "크롬으로 열기", href: chromeIntent(url) },
         steps: [
