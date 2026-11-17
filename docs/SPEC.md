@@ -105,6 +105,7 @@ interface BalanceEntry { date: string /* YYYY-MM-DD */; balance: number }
 - Vercel + @vercel/analytics
 - `?from=instagram` / `?from=youtube` → 페이지뷰를 가상 경로 `/from/instagram` · `/from/youtube` 로 기록 (`beforeSend`). Vercel 무료 플랜은 커스텀 이벤트·UTM 집계가 Pro 전용이라 우회 — 대시보드 Pages 에서 확인. 무료 한도: 계정 전체(막차 계산기 포함) 월 50,000 이벤트, 보관 1개월
 - 리전 `icn1`(서울), 막차 계산기와 같은 계정
+- 검색: `robots.txt`(/dev/ 제외) · `sitemap.xml` · canonical `/` (`?from=` 주소 중복 수집 방지) · 네이버 서치어드바이저 소유확인 메타 태그
 
 ## 4. 디자인 토큰
 
