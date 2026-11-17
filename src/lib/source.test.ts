@@ -18,6 +18,11 @@ describe("유입 경로 → 가상 경로", () => {
     expect(analyticsUrl(`${base}/?from=tiktok`)).toBe(`${base}/?from=tiktok`);
   });
 
+  it("# 뒤(옮기는 값)는 분석 기록에서 항상 뺌", () => {
+    expect(analyticsUrl(`${base}/#import=abc`)).toBe(`${base}/`);
+    expect(analyticsUrl(`${base}/?from=instagram#import=abc`)).toBe(`${base}/from/instagram`);
+  });
+
   it("깨진 주소는 출처 없음", () => {
     expect(sourceFromUrl("not a url")).toBeNull();
   });

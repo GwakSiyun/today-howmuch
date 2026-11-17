@@ -20,9 +20,14 @@ export function sourceFromUrl(url: string): Source | null {
   }
 }
 
-/** 출처가 있으면 같은 도메인의 /from/{출처} 로, 없으면 그대로 */
+/**
+ * 출처가 있으면 같은 도메인의 /from/{출처} 로, 없으면 그대로.
+ * # 뒤(사파리 → 홈 화면 앱으로 옮기는 값 등)는 항상 뺀다 — 잔액이 분석 기록에 남지 않게.
+ */
 export function analyticsUrl(url: string): string {
-  const source = sourceFromUrl(url);
-  if (source === null) return url;
-  return `${new URL(url).origin}/from/${source}`;
+  const hashIndex = url.indexOf("#");
+  const clean = hashIndex === -1 ? url : url.slice(0, hashIndex);
+  const source = sourceFromUrl(clean);
+  if (source === null) return clean;
+  return `${new URL(clean).origin}/from/${source}`;
 }
