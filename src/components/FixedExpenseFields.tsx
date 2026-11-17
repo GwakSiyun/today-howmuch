@@ -7,8 +7,10 @@ interface FixedExpenseFieldsProps {
   onChange: (next: ExpenseDraft[]) => void;
 }
 
+// ⚠️ 입력칸 글자는 16px 이상(text-base): 아이폰 사파리는 16px 미만 입력칸을 누르면 화면을 자동 확대하고
+// 저장 후에도 확대가 남는다. (viewport maximum-scale로 막으면 사용자가 직접 확대도 못 해서 안 씀)
 const inputClass =
-  "h-10 w-full rounded-md border border-line bg-card px-3 text-sm text-ink outline-none focus:border-ink";
+  "h-10 w-full rounded-md border border-line bg-card px-3 text-base text-ink outline-none focus:border-ink";
 
 export default function FixedExpenseFields({ drafts, onChange }: FixedExpenseFieldsProps): React.ReactNode {
   function update(id: string, patch: Partial<Omit<ExpenseDraft, "id">>): void {
