@@ -1,11 +1,10 @@
-// 사파리 → 홈 화면 앱 값 옮기기 (서버·로그인 없이) — 순수 함수
-// 아이폰은 홈 화면 앱과 사파리가 저장 공간을 따로 쓴다. 홈 화면 추가 안내가 열려 있는 동안
-// 주소 # 뒤에 값을 담아 두고, 홈 화면 앱이 그 주소로 처음 열리면 읽어서 저장한다.
-// ⚠️ 시험 중: 아이폰이 홈 화면 앱 시작 주소로 '지금 주소'를 쓰는지(# 포함) 실기기 확인 필요.
-// # 뒤는 서버로 전송되지 않는다. 분석 기록에서도 뺀다(source.ts analyticsUrl).
+// 사파리 → 홈 화면 앱 값 옮기기 (서버·로그인 없이, 복사·붙여넣기) — 순수 함수
+// 아이폰은 홈 화면 앱과 사파리가 저장 공간을 따로 쓰지만, 복사·붙여넣기(클립보드)는 같이 쓴다.
+// 사파리에서 '옮기기 코드'를 복사 → 홈 화면 앱 첫 설정 화면에서 붙여넣기.
+// (2026-11-17 시험: 주소 # 에 담는 방식은 아이폰이 manifest 시작 주소 '/'로 홈 화면 앱을 만들어 실패 → 폐기)
 import { parseAppData, type AppData } from "./storage";
 
-export const IMPORT_KEY = "import";
+const MARKER = "today-howmuch:";
 
 function toBase64Url(text: string): string {
   const bytes = new TextEncoder().encode(text); // 고정 지출 이름 등 한글
@@ -27,21 +26,17 @@ function fromBase64Url(value: string): string | null {
   }
 }
 
-/** 값 → 주소 # 뒤에 붙일 문자열 ("import=…") */
-export function encodeTransferHash(data: AppData): string {
-  return `${IMPORT_KEY}=${toBase64Url(JSON.stringify(data))}`;
+/** 값 → 클립보드에 넣을 옮기기 코드 */
+export function encodeTransferCode(data: AppData): string {
+  return `${MARKER}${toBase64Url(JSON.stringify(data))}`;
 }
 
-/** 주소 # 부분("#import=…" 또는 "import=…") → 값. 형식이 틀리면 null (parseAppData로 검증) */
-export function decodeTransferHash(hash: string): AppData | null {
-  const params = new URLSearchParams(hash.replace(/^#/, ""));
-  const value = params.get(IMPORT_KEY);
-  if (!value) return null;
-  return parseAppData(fromBase64Url(value));
-}
-
-/** 주소에서 # 부분을 뺀 것 */
-export function stripHash(url: string): string {
-  const index = url.indexOf("#");
-  return index === -1 ? url : url.slice(0, index);
+/**
+ * 붙여넣은 글 → 값. 앞뒤 다른 글자·줄바꿈이 섞여 있어도 코드 부분만 찾는다.
+ * 코드가 없거나 형식이 틀리면 null (parseAppData로 검증)
+ */
+export function decodeTransferCode(text: string): AppData | null {
+  const match = text.match(/today-howmuch:([A-Za-z0-9_-]+)/);
+  if (!match) return null;
+  return parseAppData(fromBase64Url(match[1]));
 }

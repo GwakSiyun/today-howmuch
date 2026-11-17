@@ -37,7 +37,7 @@ export default function InstallGuideCard({ variant, hasData, data, previewEnv }:
     setDismissed(true);
   }
 
-  const sheet = open && <InstallGuideSheet env={env} hasData={hasData} transferData={previewEnv ? undefined : data} onClose={() => setOpen(false)} />;
+  const sheet = open && <InstallGuideSheet env={env} hasData={hasData} transferData={data} onClose={() => setOpen(false)} />;
 
   if (variant === "setup") {
     const title = inApp ? `${inApp} 안에서 적은 값은 ${toBrowser} 옮겨지지 않아요` : "홈 화면에 먼저 추가하고 시작해요";
