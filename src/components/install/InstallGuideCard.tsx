@@ -4,19 +4,22 @@
 import { useState } from "react";
 import { josa } from "@/lib/korean";
 import { canShowInstallGuide, shouldGuideBeforeSetup } from "@/lib/platform";
+import type { AppData } from "@/lib/storage";
 import InstallGuideSheet from "./InstallGuideSheet";
 import { readDismissed, useInstallEnv, writeDismissed, type GuideVariant, type InstallEnv } from "./useInstall";
 
 interface InstallGuideCardProps {
   variant: GuideVariant;
   hasData: boolean;
+  /** 아이폰 사파리 → 홈 화면 앱으로 옮겨 볼 값 (메인 화면에서만 넘김) */
+  data?: AppData;
   /** 개발용 미리보기: 기기 판별·닫기 기억을 무시하고 이 상황으로 보여 줌 */
   previewEnv?: InstallEnv;
 }
 
 const APP_NAME: Readonly<Record<string, string>> = { instagram: "인스타", kakao: "카톡", inapp: "이 앱" };
 
-export default function InstallGuideCard({ variant, hasData, previewEnv }: InstallGuideCardProps): React.ReactNode {
+export default function InstallGuideCard({ variant, hasData, data, previewEnv }: InstallGuideCardProps): React.ReactNode {
   const detected = useInstallEnv();
   const env = previewEnv ?? detected;
   const [dismissed, setDismissed] = useState<boolean>(() => (previewEnv ? false : readDismissedSafe(variant)));
@@ -34,7 +37,7 @@ export default function InstallGuideCard({ variant, hasData, previewEnv }: Insta
     setDismissed(true);
   }
 
-  const sheet = open && <InstallGuideSheet env={env} hasData={hasData} onClose={() => setOpen(false)} />;
+  const sheet = open && <InstallGuideSheet env={env} hasData={hasData} transferData={previewEnv ? undefined : data} onClose={() => setOpen(false)} />;
 
   if (variant === "setup") {
     const title = inApp ? `${inApp} 안에서 적은 값은 ${toBrowser} 옮겨지지 않아요` : "홈 화면에 먼저 추가하고 시작해요";

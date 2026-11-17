@@ -95,7 +95,7 @@ export default function MainScreen({ data, save = saveAppData, now }: MainScreen
         </button>
       )}
 
-      <InstallGuideCard variant="main" hasData />
+      <InstallGuideCard variant="main" hasData data={data} />
 
       {sheet === "balance" && <BalanceSheet data={data} save={save} onClose={closeSheet} />}
       {sheet === "fixed" && <FixedExpenseSheet data={data} save={save} onClose={closeSheet} />}

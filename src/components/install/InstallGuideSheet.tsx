@@ -1,7 +1,9 @@
 // 홈 화면에 추가하는 법 — 들어온 곳(아이폰 사파리·안드로이드 크롬·인스타·카톡·유튜브)에 맞춘 단계
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { josa } from "@/lib/korean";
 import { needsYoutubeHint } from "@/lib/platform";
+import type { AppData } from "@/lib/storage";
+import { encodeTransferHash, stripHash } from "@/lib/transfer";
 import BottomSheet from "../BottomSheet";
 import StepIcon, { type StepIconKind } from "./StepIcon";
 import { promptInstall, useCanPromptInstall, type InstallEnv } from "./useInstall";
@@ -179,10 +181,32 @@ interface InstallGuideSheetProps {
   env: InstallEnv;
   /** 이미 입력한 데이터가 있는지 — 아이폰은 홈 화면 앱에서 다시 입력해야 함을 알림 */
   hasData: boolean;
+  /** 아이폰 사파리에서 홈 화면 앱으로 옮겨 볼 값 (미리보기에선 안 넘김 → 주소 안 건드림) */
+  transferData?: AppData;
   onClose: () => void;
 }
 
-export default function InstallGuideSheet({ env, hasData, onClose }: InstallGuideSheetProps): React.ReactNode {
+export default function InstallGuideSheet({ env, hasData, transferData, onClose }: InstallGuideSheetProps): React.ReactNode {
+  // ⚠️ 시험 중: 시트가 열려 있는 동안만 주소 # 뒤에 값을 담아 둔다.
+  // 아이폰이 이 주소로 홈 화면 앱을 만들면, 앱 첫 실행 때 HomeApp이 읽어서 저장한다.
+  // 시트를 닫으면 바로 지운다 (주소를 공유해도 값이 따라가지 않게).
+  const transfer = env.context === "ios-safari" ? transferData : undefined;
+  useEffect(() => {
+    if (!transfer) return;
+    try {
+      window.history.replaceState(window.history.state, "", `${stripHash(window.location.href)}#${encodeTransferHash(transfer)}`);
+    } catch {
+      return;
+    }
+    return () => {
+      try {
+        window.history.replaceState(window.history.state, "", stripHash(window.location.href));
+      } catch {
+        // 주소를 못 바꿔도 앱 동작엔 영향 없음
+      }
+    };
+  }, [transfer]);
+
   // 복사·외부로 열기는 출처(?from=)를 빼고 첫 화면으로 — 같은 방문이 두 번 집계되지 않게
   const url = `${window.location.origin}/`;
   const guide = buildGuide(env, url);
@@ -281,7 +305,10 @@ export default function InstallGuideSheet({ env, hasData, onClose }: InstallGuid
       {env.ios && (
         <p className="mt-4 rounded-md bg-bg px-3 py-2.5 text-xs leading-5 text-sub">
           아이폰은 홈 화면 앱이 사파리와 따로 저장해요. 추가한 다음엔 <B>홈 화면 아이콘으로 열어서</B> 써 주세요.
-          {hasData && " 이미 적은 월급날·잔액은 홈 화면 앱에서 한 번 더 입력해야 해요."}
+          {hasData &&
+            (transfer
+              ? " 지금 적어 둔 값은 홈 화면 앱으로 옮겨 볼게요. 안 옮겨졌으면 한 번 더 입력해 주세요."
+              : " 이미 적은 월급날·잔액은 홈 화면 앱에서 한 번 더 입력해야 해요.")}
           {env.context === "ios-safari" && (
             <>
               {" "}
