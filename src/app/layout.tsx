@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import SiteAnalytics from "@/components/SiteAnalytics";
+import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
-const SITE_URL = "https://today-howmuch.vercel.app";
 const TITLE = "오늘얼마 — 월급날까지 하루 생존 금액 | 월급날 계산기";
 const DESCRIPTION =
   "월급날 계산기 오늘얼마. 지금 잔액과 다음 월급날·용돈날만 넣으면 오늘 얼마까지 써도 되는지 알려줘요. 앱 설치·지출 기록 없이 웹에서 바로.";
@@ -13,6 +13,10 @@ export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   applicationName: "오늘얼마",
+  // 검색엔진에 대표 주소 알림 — ?from=instagram 같은 주소가 따로 수집되지 않게
+  alternates: { canonical: "/" },
+  // 네이버 서치어드바이저 소유 확인 (HTML 태그 방식)
+  verification: { other: { "naver-site-verification": "6c957525dc6bde7468dc4964f624c4063e6f2671" } },
   // 카톡·에타·SNS 링크 미리보기 (이미지는 파일 규칙으로 자동 연결)
   openGraph: {
     type: "website",
