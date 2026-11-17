@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { AppData } from "./storage";
-import { decodeTransferHash, encodeTransferHash, stripHash } from "./transfer";
+import { decodeTransferCode, encodeTransferCode } from "./transfer";
 
 const data: AppData = {
   version: 1,
@@ -16,27 +16,24 @@ const data: AppData = {
   ],
 };
 
-describe("사파리 → 홈 화면 앱 값 옮기기", () => {
-  it("담았다가 그대로 꺼냄 (한글·이모지 포함)", () => {
-    const hash = encodeTransferHash(data);
-    expect(hash.startsWith("import=")).toBe(true);
-    expect(decodeTransferHash(`#${hash}`)).toEqual(data);
+describe("옮기기 코드 (복사·붙여넣기)", () => {
+  it("복사했다가 그대로 붙여넣음 (한글·이모지 포함)", () => {
+    const code = encodeTransferCode(data);
+    expect(code).toMatch(/^today-howmuch:[A-Za-z0-9_-]+$/);
+    expect(decodeTransferCode(code)).toEqual(data);
   });
 
-  it("주소에 쓸 수 있는 글자만 (+ / = 없음)", () => {
-    expect(encodeTransferHash(data)).toMatch(/^import=[A-Za-z0-9_-]+$/);
+  it("앞뒤 공백·줄바꿈·다른 글이 섞여도 코드만 찾음", () => {
+    const code = encodeTransferCode(data);
+    expect(decodeTransferCode(`  \n${code}\n `)).toEqual(data);
+    expect(decodeTransferCode(`오늘얼마 옮기기 코드 ${code} 끝`)).toEqual(data);
   });
 
-  it("없거나 깨졌거나 형식이 틀리면 null", () => {
-    expect(decodeTransferHash("")).toBeNull();
-    expect(decodeTransferHash("#import=@@@")).toBeNull();
-    expect(decodeTransferHash("#other=1")).toBeNull();
-    const broken = encodeTransferHash({ ...data, settings: { ...data.settings, payDay: 99 } });
-    expect(decodeTransferHash(broken)).toBeNull();
-  });
-
-  it("stripHash", () => {
-    expect(stripHash("https://a.app/?from=instagram#import=xyz")).toBe("https://a.app/?from=instagram");
-    expect(stripHash("https://a.app/")).toBe("https://a.app/");
+  it("코드가 아니거나 깨졌거나 형식이 틀리면 null", () => {
+    expect(decodeTransferCode("")).toBeNull();
+    expect(decodeTransferCode("아무 글자")).toBeNull();
+    expect(decodeTransferCode("today-howmuch:@@@")).toBeNull();
+    const broken = encodeTransferCode({ ...data, settings: { ...data.settings, payDay: 99 } });
+    expect(decodeTransferCode(broken)).toBeNull();
   });
 });

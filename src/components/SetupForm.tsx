@@ -8,6 +8,7 @@ import { saveAppData } from "@/lib/storage";
 import AutoWidthInput from "./AutoWidthInput";
 import FixedExpenseFields from "./FixedExpenseFields";
 import InstallGuideCard from "./install/InstallGuideCard";
+import PasteTransferCard from "./install/PasteTransferCard";
 import { useTodayKey } from "./useToday";
 import PayDayFields, { parsePayDay } from "./PayDayFields";
 
@@ -81,6 +82,8 @@ export default function SetupForm(): React.ReactNode {
 
       {/* 아이폰·앱 안 브라우저: 입력 전에 홈 화면 추가 안내 */}
       <InstallGuideCard variant="setup" hasData={false} />
+      {/* 아이폰 홈 화면 앱: 사파리에서 복사한 값 붙여넣기 */}
+      <PasteTransferCard />
 
       {/* 1. 다음 돈 들어오는 날 */}
       <section className={cardClass}>

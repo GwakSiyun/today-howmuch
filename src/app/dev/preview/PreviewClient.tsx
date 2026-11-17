@@ -3,6 +3,7 @@
 // ⚠️ 개발용 미리보기 — 예시 데이터. 기기 저장소(localStorage)는 읽지도 쓰지도 않는다.
 import { useState, useSyncExternalStore } from "react";
 import InstallGuideCard from "@/components/install/InstallGuideCard";
+import PasteTransferCard from "@/components/install/PasteTransferCard";
 import type { InstallEnv } from "@/components/install/useInstall";
 import MainScreen from "@/components/main/MainScreen";
 import { toDateKey } from "@/lib/payday";
@@ -91,6 +92,7 @@ const INSTALL_CASES: ReadonlyArray<{ label: string; env: InstallEnv }> = [
   { label: "안드로이드 크롬", env: { context: "android-chrome", ios: false, source: null } },
   { label: "안드로이드 인스타 안", env: { context: "instagram", ios: false, source: "instagram" } },
   { label: "삼성 인터넷", env: { context: "android-other", ios: false, source: null } },
+  { label: "아이폰 홈 화면 앱(붙여넣기)", env: { context: "standalone", ios: true, source: null } },
 ];
 
 function subscribeNothing(): () => void {
@@ -162,7 +164,8 @@ export default function PreviewClient(): React.ReactNode {
       </div>
       <div key={installCase} className="flex flex-col gap-2.5">
         <InstallGuideCard variant="setup" hasData={false} previewEnv={INSTALL_CASES[installCase].env} />
-        <InstallGuideCard variant="main" hasData previewEnv={INSTALL_CASES[installCase].env} />
+        <InstallGuideCard variant="main" hasData data={data} previewEnv={INSTALL_CASES[installCase].env} />
+        <PasteTransferCard previewEnv={INSTALL_CASES[installCase].env} onImport={() => true} />
       </div>
     </div>
   );
