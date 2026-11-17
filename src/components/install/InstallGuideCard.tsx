@@ -41,9 +41,12 @@ export default function InstallGuideCard({ variant, hasData, data, previewEnv }:
 
   if (variant === "setup") {
     const title = inApp ? `${inApp} 안에서 적은 값은 ${toBrowser} 옮겨지지 않아요` : "홈 화면에 먼저 추가하고 시작해요";
+    // 사파리는 [입력한 값 복사하기]로 옮길 수 있음 / 아이폰 크롬 등은 복사 기능이 없어 다시 적어야 함
     const body = inApp
       ? `${toBrowser} 열어서 홈 화면에 추가한 다음 적어 주세요.`
-      : "아이폰은 홈 화면 앱이 따로 저장해서, 여기서 적으면 다시 적어야 해요.";
+      : env.context === "ios-safari"
+        ? "아이폰은 홈 화면 앱이 따로 저장해요. 먼저 추가하고 거기서 적으면 옮길 필요가 없어요."
+        : "아이폰은 홈 화면 앱이 따로 저장해서, 여기서 적으면 다시 적어야 해요.";
     return (
       <section className="rounded-[10px] border border-ink bg-card px-5 py-4">
         <p className="text-[15px] font-semibold">{title}</p>
