@@ -11,13 +11,14 @@ import BalanceCard from "./BalanceCard";
 import BalanceSheet from "./BalanceSheet";
 import CompareCard from "./CompareCard";
 import FixedExpenseCard from "./FixedExpenseCard";
+import FeedbackSheet from "./FeedbackSheet";
 import FixedExpenseSheet from "./FixedExpenseSheet";
 import InstallGuideCard from "../install/InstallGuideCard";
 import PaydayCard from "./PaydayCard";
 import SettingsSheet from "./SettingsSheet";
 import { useTodayKey } from "../useToday";
 
-type SheetKind = "balance" | "fixed" | "settings";
+type SheetKind = "balance" | "fixed" | "settings" | "feedback";
 
 interface MainScreenProps {
   data: AppData;
@@ -97,11 +98,29 @@ export default function MainScreen({ data, save = saveAppData, now }: MainScreen
 
       <InstallGuideCard variant="main" hasData data={data} />
 
+      {/* 금액 화면을 방해하지 않게 맨 아래 작은 글씨 (설정 시트에도 있음) */}
+      <div className="flex justify-center pt-2">
+        <button
+          type="button"
+          onClick={() => setSheet("feedback")}
+          className="min-h-11 px-3 text-xs text-sub underline underline-offset-2"
+        >
+          의견 보내기
+        </button>
+      </div>
+
       {sheet === "balance" && <BalanceSheet data={data} save={save} onClose={closeSheet} />}
       {sheet === "fixed" && <FixedExpenseSheet data={data} save={save} onClose={closeSheet} />}
       {sheet === "settings" && (
-        <SettingsSheet data={data} save={save} onClose={closeSheet} onEditFixed={() => setSheet("fixed")} />
+        <SettingsSheet
+          data={data}
+          save={save}
+          onClose={closeSheet}
+          onEditFixed={() => setSheet("fixed")}
+          onFeedback={() => setSheet("feedback")}
+        />
       )}
+      {sheet === "feedback" && <FeedbackSheet onClose={closeSheet} />}
     </div>
   );
 }
