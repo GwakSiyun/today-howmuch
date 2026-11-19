@@ -9,12 +9,13 @@ interface SettingsSheetProps {
   data: AppData;
   onClose: () => void;
   onEditFixed: () => void;
+  onFeedback: () => void;
   save: (next: AppData) => boolean;
 }
 
 const rowClass = "flex min-h-12 items-center justify-between gap-3 border-b border-line text-sm";
 
-export default function SettingsSheet({ data, onClose, onEditFixed, save }: SettingsSheetProps): React.ReactNode {
+export default function SettingsSheet({ data, onClose, onEditFixed, onFeedback, save }: SettingsSheetProps): React.ReactNode {
   const baseId = useId();
   const { settings } = data;
   const [payDayText, setPayDayText] = useState<string>(String(settings.payDay));
@@ -81,6 +82,11 @@ export default function SettingsSheet({ data, onClose, onEditFixed, save }: Sett
           <span className="text-sub">
             {settings.fixedExpenses.length > 0 ? `${settings.fixedExpenses.length}개 · 편집` : "추가하기"} ›
           </span>
+        </button>
+
+        <button type="button" onClick={onFeedback} className={`${rowClass} w-full text-left`}>
+          <span>의견 보내기</span>
+          <span className="text-sub">불편한 점 · 바라는 기능 ›</span>
         </button>
       </div>
 

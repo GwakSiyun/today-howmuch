@@ -9,6 +9,8 @@ interface BottomSheetProps {
   onSubmit: () => void;
   error: string | null;
   submitLabel?: string;
+  /** 보내는 중이면 버튼을 막아 두 번 누르지 않게 */
+  submitting?: boolean;
   children: React.ReactNode;
 }
 
@@ -18,6 +20,7 @@ export default function BottomSheet({
   onSubmit,
   error,
   submitLabel = "저장",
+  submitting = false,
   children,
 }: BottomSheetProps): React.ReactNode {
   const titleId = useId();
@@ -34,6 +37,7 @@ export default function BottomSheet({
     event.preventDefault();
     // portal이어도 React 이벤트는 부모 컴포넌트로 올라감 → 바깥 폼(첫 설정)이 같이 제출되지 않게
     event.stopPropagation();
+    if (submitting) return;
     onSubmit();
   }
 
@@ -63,7 +67,11 @@ export default function BottomSheet({
           <button type="button" onClick={onClose} className="h-11 w-20 rounded-md border border-line text-sm text-sub">
             닫기
           </button>
-          <button type="submit" className="h-11 flex-1 rounded-md bg-btn text-sm font-semibold text-white">
+          <button
+            type="submit"
+            disabled={submitting}
+            className="h-11 flex-1 rounded-md bg-btn text-sm font-semibold text-white disabled:opacity-60"
+          >
             {submitLabel}
           </button>
         </div>
